@@ -17,7 +17,7 @@ approveWords = [
 
 # :: Element -> [Comment]
 # Parse an element containing PR detail into a list of comment that is approving the PR
-parsePRD = (elem) -> 
+parsePRD = (elem) ->
   timeline = getTimeline(elem)
   comments = R.map(parseComment, timeline)
   commentsAfterLatestCommit = R.foldl(((acc, x) -> if not x then [] else [x].concat(acc)), [], comments)
@@ -44,13 +44,13 @@ isApprove = (comment) ->
 
 # :: Element -> [Excerpt]
 # Parse an element containing PR list into a list of Excerpt
-parsePRL = (elem) -> 
+parsePRL = (elem) ->
   R.map(parseExcerpt, getIssuesElem(elem))
 
 getIssuesElem = (elem) -> elem.querySelectorAll('div.issues-listing > ul > li')
 getIssueId = (elem) -> elem.getAttribute('data-issue-id')
 getIssueUrl = (elem) -> elem.querySelector('.issue-title > a').getAttribute('href')
-parseExcerpt = (elem) -> 
+parseExcerpt = (elem) ->
   url = getIssueUrl(elem)
   issueId = getIssueId(elem)
   getUrl = () -> $.get(url)
@@ -70,7 +70,7 @@ checkPRDFinishCond = (elem) ->
   elem.querySelectorAll('#partial-users-approves').length > 0
 augmentComment = (comment) ->
   msg = "#{comment.username} approves this PR via this comment"
-  comment.elem.querySelector('div.timeline-comment-header-text').innerHTML += 
+  comment.elem.querySelector('div.timeline-comment-header-text').innerHTML +=
     """
     <span class="issue-pr-status">
       <div>
@@ -84,7 +84,7 @@ augmentComment = (comment) ->
 PRD_getBaseContainer = (elem) -> elem.querySelector('div.discussion-sidebar')
 PRD_getBaseItem = (elem) -> elem.querySelector('div#partial-users-participants')
 PRD_getBaseAvatar = (elem) -> elem.querySelector('a.participant-avatar')
-PRD_avatar = R.curry((elem, model) -> 
+PRD_avatar = R.curry((elem, model) ->
   ret = PRD_getBaseAvatar(elem).cloneNode(true)
   ret.setAttribute('aria-label', model.username)
   ret.setAttribute('href', '/' + model.username)
@@ -95,7 +95,7 @@ PRD_ui = (elem, models) ->
   item = PRD_getBaseItem(elem).cloneNode(true)
   item.setAttribute('id', 'partial-users-approves')
   item.querySelector('h3').innerHTML = models.length + ' approves'
-  
+
   avatars = R.map(PRD_avatar(item), models)
   avatarContainer = item.querySelector('div.participation-avatars')
   avatarContainer.removeChild(avatarContainer.firstChild) while (avatarContainer.firstChild)
@@ -104,7 +104,7 @@ PRD_ui = (elem, models) ->
 
 ## .. UI Function for PR list ..
 # :: Element, [Excerpt] -> ()
-augmentPRL = (elem, excerpts) -> 
+augmentPRL = (elem, excerpts) ->
   applyEffect = (excerptPromise) ->
     excerptPromise.then(augmentPRLItem(elem))
   R.forEach(applyEffect, excerpts)
@@ -116,14 +116,14 @@ augmentPRLItem = R.curry((elem, excerpt) ->
   container.setAttribute('style', 'width:32px')
   container.innerHTML = PRL_icon(excerpt)
 )
-PRL_getContainer = (elem, excerpt) -> 
+PRL_getContainer = (elem, excerpt) ->
   elem.querySelector('li#issue_' + excerpt.id).querySelector('div.table-list-cell-avatar')
 PRL_icon = (excerpt) ->
   """
   <a id="PRL_ui" href="#{excerpt.url}" aria-label="#{PRL_wording(excerpt)}" class="muted-link tooltipped tooltipped-e">
     <span class="octicon octicon-check"></span> #{excerpt.cmt.length}
   </a>
-  """ 
+  """
 PRL_wording = (excerpt) ->
   len = excerpt.cmt.length
   getUsername = (x) -> x.username
@@ -151,7 +151,7 @@ main = () ->
   else if isPRD
     PRD(document)
   else
-    console.log('Ooops! I dont know how to handle ' + href)
+    #console.log('Ooops! I dont know how to handle ' + href)
 
 PRL = (elem) ->
   augmentPRL(elem, parsePRL(elem)) if not checkPRLFinishCond(elem)
